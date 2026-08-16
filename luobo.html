@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>萝卜 · 群友档案</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #F5F7FA;
+            color: #212121;
+            min-height: 100vh;
+        }
+        .navbar {
+            height: 64px;
+            background: #FFFFFF;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px 0 8px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #616161;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            background: #F5F5F5;
+            color: #212121;
+        }
+        .btn-back .material-icons {
+            font-size: 22px;
+        }
+        .nav-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #212121;
+        }
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #616161;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-logout:hover {
+            background: #F5F5F5;
+            color: #D32F2F;
+        }
+        .btn-logout .material-icons {
+            font-size: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 24px 60px;
+        }
+
+        .profile-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            padding: 32px 36px;
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            border: 1px solid #F0F0F0;
+        }
+        .avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            color: #FFFFFF;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+        }
+        .profile-info {
+            flex: 1;
+            min-width: 200px;
+        }
+        .profile-info .name {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .profile-info .sub {
+            color: #616161;
+            font-size: 15px;
+            margin-top: 2px;
+        }
+        .profile-info .bio {
+            margin-top: 14px;
+            font-size: 16px;
+            line-height: 1.7;
+            background: #E8F5E9;
+            padding: 16px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2E7D32;
+            color: #212121;
+        }
+
+        .section {
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            padding: 28px 32px;
+            margin-bottom: 24px;
+            border: 1px solid #F0F0F0;
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+        .section-title .material-icons {
+            color: #2E7D32;
+            font-size: 24px;
+        }
+
+        .event-list {
+            list-style: none;
+            padding: 0;
+        }
+        .event-item {
+            display: flex;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0F0F0;
+            align-items: flex-start;
+        }
+        .event-item:last-child {
+            border-bottom: none;
+        }
+        .event-bullet {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #2E7D32;
+            flex-shrink: 0;
+            margin-top: 6px;
+            position: relative;
+        }
+        .event-bullet::after {
+            content: '';
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: calc(100% + 12px);
+            background: #E0E0E0;
+        }
+        .event-item:last-child .event-bullet::after {
+            display: none;
+        }
+        .event-text {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .event-text .date {
+            font-weight: 600;
+            color: #2E7D32;
+            margin-right: 8px;
+        }
+
+        .quote-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .quote-item {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 14px 18px;
+            background: #FAFAFA;
+            border-radius: 8px;
+            border-left: 4px solid #FF6D00;
+        }
+        .quote-item .q-icon {
+            color: #FF6D00;
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .quote-item blockquote {
+            font-size: 15px;
+            line-height: 1.7;
+            font-style: italic;
+            margin: 0;
+        }
+        .quote-item blockquote::before {
+            content: '“';
+            color: #FF6D00;
+            font-weight: 700;
+            opacity: 0.6;
+        }
+        .quote-item blockquote::after {
+            content: '”';
+            color: #FF6D00;
+            font-weight: 700;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 16px 40px;
+            }
+            .profile-card {
+                padding: 24px 20px;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 16px;
+            }
+            .avatar-large {
+                width: 96px;
+                height: 96px;
+                font-size: 38px;
+            }
+            .profile-info .name {
+                font-size: 24px;
+            }
+            .profile-info .bio {
+                text-align: left;
+                font-size: 15px;
+                padding: 14px 16px;
+            }
+            .section {
+                padding: 20px 18px;
+            }
+            .btn-logout span {
+                display: none;
+            }
+            .btn-logout {
+                padding: 8px;
+            }
+            .nav-title {
+                font-size: 16px;
+            }
+            .btn-back span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="home.html" class="btn-back">
+                <span class="material-icons">arrow_back</span>
+                <span>返回</span>
+            </a>
+            <span class="nav-title">萝卜</span>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+            <span class="material-icons">logout</span>
+            <span>退出</span>
+        </button>
+    </nav>
+
+    <div class="container">
+        <!-- 头部 -->
+        <div class="profile-card">
+            <div class="avatar-large" style="background:#2E7D32;">萝</div>
+            <div class="profile-info">
+                <div class="name">萝卜</div>
+                <div class="sub">📌 群友档案 · #luobo</div>
+                <div class="bio">群里的智慧担当，冷静理性又带点幽默。总能在纷乱中理清头绪，是大家的定海神针。</div>
+            </div>
+        </div>
+
+        <!-- 事迹 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="material-icons">history</span> 事迹
+            </div>
+            <ul class="event-list">
+                <li class="event-item">
+                    <div class="event-bullet"></div>
+                    <div class="event-text"><span class="date">2024.02</span>发起群内读书会，带领大家每月共读一本好书。</div>
+                </li>
+                <li class="event-item">
+                    <div class="event-bullet"></div>
+                    <div class="event-text"><span class="date">2024.04</span>编写群内机器人「小萝卜」，实现自动签到和趣味问答。</div>
+                </li>
+                <li class="event-item">
+                    <div class="event-bullet"></div>
+                    <div class="event-text"><span class="date">2024.07</span>组织群内知识竞赛，题目涵盖天文地理，群友直呼过瘾。</div>
+                </li>
+                <li class="event-item">
+                    <div class="event-bullet"></div>
+                    <div class="event-text"><span class="date">2024.10</span>搭建群友档案馆网站，为群内文化留下数字资产。</div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 语录 -->
+        <div class="section">
+            <div class="section-title">
+                <span class="material-icons">format_quote</span> 语录
+            </div>
+            <ul class="quote-list">
+                <li class="quote-item">
+                    <span class="q-icon material-icons">format_quote</span>
+                    <blockquote>知识就像萝卜，越挖越有，越吃越香。</blockquote>
+                </li>
+                <li class="quote-item">
+                    <span class="q-icon material-icons">format_quote</span>
+                    <blockquote>理性思考，感性生活，二者缺一不可。</blockquote>
+                </li>
+                <li class="quote-item">
+                    <span class="q-icon material-icons">format_quote</span>
+                    <blockquote>群内的每一次讨论都让我成长，感谢各位。</blockquote>
+                </li>
+                <li class="quote-item">
+                    <span class="q-icon material-icons">format_quote</span>
+                    <blockquote>不要急着吃萝卜，先看看它长在什么样的土壤里。</blockquote>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        if (sessionStorage.getItem('qunyou_auth') !== 'true') {
+            window.location.href = 'index.html';
+        }
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            sessionStorage.removeItem('qunyou_auth');
+            window.location.href = 'index.html';
+        });
+    </script>
+
+</body>
+</html>

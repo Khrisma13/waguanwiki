@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>群友档案馆 · 登录</title>
+    <!-- 防爬虫 -->
+    <meta name="robots" content="noindex, nofollow" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #E3F2FD 0%, #90CAF9 100%);
+            padding: 20px;
+            margin: 0;
+        }
+        .login-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 48px 40px 40px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            transition: 0.25s ease;
+        }
+        .login-icon {
+            font-size: 56px;
+            color: #1565C0;
+        }
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #212121;
+            margin-top: 4px;
+        }
+        .login-title span {
+            color: #1565C0;
+        }
+        .login-sub {
+            color: #616161;
+            font-size: 15px;
+            margin-top: 6px;
+            margin-bottom: 28px;
+        }
+        .login-error {
+            color: #D32F2F;
+            font-size: 14px;
+            min-height: 24px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .login-error.show {
+            opacity: 1;
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        .input-group .material-icons {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9E9E9E;
+            font-size: 22px;
+            pointer-events: none;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            font-size: 16px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+            background: #FAFAFA;
+            transition: 0.2s;
+            color: #212121;
+            font-family: inherit;
+        }
+        .input-group input:focus {
+            border-color: #1565C0;
+            background: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.12);
+            outline: none;
+        }
+        .toggle-pwd {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9E9E9E;
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            background: #1565C0;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 8px rgba(21, 101, 192, 0.3);
+            letter-spacing: 0.5px;
+        }
+        .login-btn:hover {
+            background: #0D47A1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(21, 101, 192, 0.4);
+        }
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        .login-hint {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #9E9E9E;
+        }
+        .login-hint code {
+            background: #F0F0F0;
+            padding: 2px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #424242;
+        }
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-12px);
+            }
+            40% {
+                transform: translateX(12px);
+            }
+            60% {
+                transform: translateX(-8px);
+            }
+            80% {
+                transform: translateX(8px);
+            }
+        }
+        .shake {
+            animation: shake 0.4s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card" id="loginCard">
+        <div class="login-icon">📚</div>
+        <div class="login-title">群友<span>档案馆</span></div>
+        <div class="login-sub">输入密码 · 翻阅记忆</div>
+
+        <div class="login-error" id="loginError">密码错误，请重试</div>
+
+        <div class="input-group">
+            <span class="material-icons">lock</span>
+            <input type="password" id="pwdInput" placeholder="请输入密码" autofocus />
+            <button class="toggle-pwd" id="togglePwd" type="button" aria-label="切换可见性">
+                <span class="material-icons">visibility_off</span>
+            </button>
+        </div>
+
+        <button class="login-btn" id="loginBtn">进入档案馆</button>
+
+        <div class="login-hint">
+            请询问网站管理员以获取密码
+        </div>
+    </div>
+
+    <script>
+        const PASSWORD = 'qunyou2024';
+        const STORAGE_KEY = 'qunyou_auth';
+
+        const pwdInput = document.getElementById('pwdInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        const togglePwd = document.getElementById('togglePwd');
+        const loginCard = document.getElementById('loginCard');
+
+        // 若已登录则直接跳转
+        if (sessionStorage.getItem(STORAGE_KEY) === 'true') {
+            window.location.href = 'home.html';
+        }
+
+        function attemptLogin() {
+            const pwd = pwdInput.value.trim();
+            if (pwd === PASSWORD) {
+                sessionStorage.setItem(STORAGE_KEY, 'true');
+                window.location.href = 'home.html';
+            } else {
+                loginError.classList.add('show');
+                loginCard.classList.remove('shake');
+                void loginCard.offsetWidth; // 触发重绘
+                loginCard.classList.add('shake');
+                pwdInput.value = '';
+                pwdInput.focus();
+            }
+        }
+
+        loginBtn.addEventListener('click', attemptLogin);
+        pwdInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') attemptLogin();
+        });
+
+        togglePwd.addEventListener('click', () => {
+            const type = pwdInput.type === 'password' ? 'text' : 'password';
+            pwdInput.type = type;
+            togglePwd.querySelector('.material-icons').textContent =
+                type === 'password' ? 'visibility_off' : 'visibility';
+        });
+
+        pwdInput.addEventListener('focus', () => {
+            loginError.classList.remove('show');
+        });
+    </script>
+</body>
+</html>

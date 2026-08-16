@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>群友名录 · 导航</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #F5F7FA;
+            color: #212121;
+            min-height: 100vh;
+        }
+        /* 导航栏 */
+        .navbar {
+            height: 64px;
+            background: #FFFFFF;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #212121;
+        }
+        .navbar-brand .material-icons {
+            color: #1565C0;
+            font-size: 28px;
+        }
+        .navbar-brand span {
+            color: #1565C0;
+        }
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .member-badge {
+            background: #E3F2FD;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1565C0;
+        }
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #616161;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-logout:hover {
+            background: #F5F5F5;
+            color: #D32F2F;
+        }
+        .btn-logout .material-icons {
+            font-size: 20px;
+        }
+
+        /* 内容 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 32px 60px;
+        }
+        .page-header {
+            margin-bottom: 36px;
+        }
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .page-header p {
+            color: #616161;
+            font-size: 16px;
+            margin-top: 4px;
+        }
+
+        .member-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 28px;
+        }
+
+        .member-card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 28px 20px 24px;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            border: 1px solid #F0F0F0;
+        }
+        .member-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.10);
+            border-color: #BBDEFB;
+        }
+        .member-card:active {
+            transform: translateY(-2px);
+        }
+        .member-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+            font-size: 32px;
+            font-weight: 700;
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .member-name {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .member-tag {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #1565C0;
+            background: #E3F2FD;
+            padding: 2px 14px;
+            border-radius: 12px;
+            margin-top: 4px;
+        }
+        .member-intro {
+            font-size: 14px;
+            color: #616161;
+            margin-top: 12px;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .card-hint {
+            margin-top: 18px;
+            font-size: 13px;
+            color: #9E9E9E;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .card-hint .material-icons {
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 16px;
+            }
+            .navbar-brand {
+                font-size: 17px;
+            }
+            .btn-logout span {
+                display: none;
+            }
+            .btn-logout {
+                padding: 8px;
+            }
+            .container {
+                padding: 24px 16px 40px;
+            }
+            .member-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 16px;
+            }
+            .member-card {
+                padding: 20px 12px 16px;
+            }
+            .member-avatar {
+                width: 64px;
+                height: 64px;
+                font-size: 26px;
+            }
+            .member-name {
+                font-size: 17px;
+            }
+        }
+        @media (max-width: 480px) {
+            .member-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span class="material-icons">archive</span>
+            群友<span>档案馆</span>
+        </div>
+        <div class="navbar-actions">
+            <span class="member-badge">👥 2 位群友</span>
+            <button class="btn-logout" id="logoutBtn">
+                <span class="material-icons">logout</span>
+                <span>退出</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>📖 群友名录</h1>
+            <p>点击卡片浏览每位群友的专属档案</p>
+        </div>
+
+        <div class="member-grid">
+            <!-- 柚子 -->
+            <a href="youzi.html" class="member-card">
+                <div class="member-avatar" style="background:#E65100;">柚</div>
+                <div class="member-name">柚子</div>
+                <div class="member-tag">✨ 群友</div>
+                <div class="member-intro">群里的开心果，永远充满活力与阳光。</div>
+                <div class="card-hint">
+                    <span class="material-icons">chevron_right</span> 查看档案
+                </div>
+            </a>
+
+            <!-- 萝卜 -->
+            <a href="luobo.html" class="member-card">
+                <div class="member-avatar" style="background:#2E7D32;">萝</div>
+                <div class="member-name">萝卜</div>
+                <div class="member-tag">🧠 群友</div>
+                <div class="member-intro">群里的智慧担当，冷静理性又带点幽默。</div>
+                <div class="card-hint">
+                    <span class="material-icons">chevron_right</span> 查看档案
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 鉴权：未登录则跳回登录页
+        if (sessionStorage.getItem('qunyou_auth') !== 'true') {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            sessionStorage.removeItem('qunyou_auth');
+            window.location.href = 'index.html';
+        });
+    </script>
+
+</body>
+</html>
