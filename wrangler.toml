@@ -1,8 +1,0 @@
-name = "waguanwiki-auth"
-main = "index.js"
-compatibility_date = "2024-12-18"
-
-# 定义环境变量（非敏感信息，若需隐藏密码请使用 secrets）
-[vars]
-USERNAME = "admin"
-# PASSWORD 建议使用 secret 设置，不在此暴露
