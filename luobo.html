@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -60,22 +61,19 @@
             padding:32px 36px;
             display:flex;
             gap:32px;
-            align-items:flex-start;
+            align-items:center;
             margin-bottom:28px;
             flex-wrap:wrap;
             border:1px solid #F0F0F0;
         }
         .avatar-large {
-            width:120px; height:120px;
+            width:120px;
+            height:120px;
             border-radius:50%;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:48px;
-            font-weight:700;
-            color:#FFFFFF;
+            object-fit:cover;
+            border:2px solid #CFD8DC;
+            background:#ECEFF1;
             flex-shrink:0;
-            box-shadow:0 4px 16px rgba(0,0,0,0.10);
         }
         .profile-info { flex:1; min-width:200px; }
         .profile-info .name { font-size:28px; font-weight:700; }
@@ -153,18 +151,8 @@
             font-style:italic;
             margin:0;
         }
-        .quote-item blockquote::before {
-            content:'“';
-            color:#FF6D00;
-            font-weight:700;
-            opacity:0.6;
-        }
-        .quote-item blockquote::after {
-            content:'”';
-            color:#FF6D00;
-            font-weight:700;
-            opacity:0.6;
-        }
+        .quote-item blockquote::before { content:"“"; color:#FF6D00; font-weight:700; opacity:0.6; }
+        .quote-item blockquote::after { content:"”"; color:#FF6D00; font-weight:700; opacity:0.6; }
         @media (max-width:768px) {
             .container { padding:20px 16px 40px; }
             .profile-card {
@@ -174,7 +162,7 @@
                 text-align:center;
                 gap:16px;
             }
-            .avatar-large { width:96px; height:96px; font-size:38px; }
+            .avatar-large { width:96px; height:96px; }
             .profile-info .name { font-size:24px; }
             .profile-info .bio { text-align:left; font-size:15px; padding:14px 16px; }
             .section { padding:20px 18px; }
@@ -186,7 +174,7 @@
 <body>
 
     <nav class="navbar">
-        <a href="index.html" class="btn-back">
+        <a href="home.html" class="btn-back">
             <span class="material-icons">arrow_back</span>
             <span>返回</span>
         </a>
@@ -195,34 +183,95 @@
 
     <div class="container">
         <div class="profile-card">
-            <div class="avatar-large" style="background:#2E7D32;">萝</div>
+            <img src="avatars/luobo.png" alt="萝卜" class="avatar-large" onerror="this.style.display='none'">
             <div class="profile-info">
                 <div class="name">萝卜</div>
                 <div class="sub">📌 群友档案 · #luobo</div>
-                <div class="bio">群里的智慧担当，冷静理性又带点幽默。总能在纷乱中理清头绪，是大家的定海神针。</div>
+                <div class="bio" id="bio">加载中…</div>
             </div>
         </div>
 
         <div class="section">
             <div class="section-title"><span class="material-icons">history</span> 事迹</div>
-            <ul class="event-list">
-                <li class="event-item"><div class="event-bullet"></div><div class="event-text"><span class="date">2024.02</span>发起群内读书会，带领大家每月共读一本好书。</div></li>
-                <li class="event-item"><div class="event-bullet"></div><div class="event-text"><span class="date">2024.04</span>编写群内机器人「小萝卜」，实现自动签到和趣味问答。</div></li>
-                <li class="event-item"><div class="event-bullet"></div><div class="event-text"><span class="date">2024.07</span>组织群内知识竞赛，题目涵盖天文地理，群友直呼过瘾。</div></li>
-                <li class="event-item"><div class="event-bullet"></div><div class="event-text"><span class="date">2024.10</span>搭建群友档案馆网站，为群内文化留下数字资产。</div></li>
-            </ul>
+            <ul class="event-list" id="eventList"></ul>
         </div>
 
         <div class="section">
             <div class="section-title"><span class="material-icons">format_quote</span> 语录</div>
-            <ul class="quote-list">
-                <li class="quote-item"><span class="q-icon material-icons">format_quote</span><blockquote>知识就像萝卜，越挖越有，越吃越香。</blockquote></li>
-                <li class="quote-item"><span class="q-icon material-icons">format_quote</span><blockquote>理性思考，感性生活，二者缺一不可。</blockquote></li>
-                <li class="quote-item"><span class="q-icon material-icons">format_quote</span><blockquote>群内的每一次讨论都让我成长，感谢各位。</blockquote></li>
-                <li class="quote-item"><span class="q-icon material-icons">format_quote</span><blockquote>不要急着吃萝卜，先看看它长在什么样的土壤里。</blockquote></li>
-            </ul>
+            <ul class="quote-list" id="quoteList"></ul>
         </div>
     </div>
 
+    <script>
+        // 解密密钥由 Worker 注入
+        const KEY = window.DECRYPT_KEY;
+        if (!KEY) {
+            document.body.innerHTML = '<div style="padding:40px;text-align:center;color:red;">错误：无法获取解密密钥，请确认已通过身份验证。</div>';
+            throw new Error('DECRYPT_KEY not available');
+        }
+
+        // 解密函数（与生成器中的 decrypt 相同）
+        function decrypt(encoded, key) {
+            const binary = atob(encoded);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            const decoder = new TextDecoder();
+            const xorResult = decoder.decode(bytes);
+            let result = '';
+            for (let i = 0; i < xorResult.length; i++) {
+                result += String.fromCharCode(xorResult.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+            }
+            return result;
+        }
+
+        // 加密数据（由生成器填充）
+        const encryptedData = {
+            bio: "57+F6Ya+55un5piS5oSO5oqz5by277y+5YaH6Z2r55Cz5oGG5Y665bmF54OR5biU6bqu44Gn5oCJ6ION5Zya57qC5LiQ5Lmf55Gl5rmt5aWd57qc772p5pid5aSX5a6E55qx5a+75rSF56S96ZOg44Gr",
+            events: ["U0JRXEdGV07lj6HotYXnvpHlh6ToronkuIXkvbLvvaXluZDpo6PlpJXlrobmr73mnL3lhJDoronkuaPmnYTlpJTkuJDjgac=","U0JRXEdGUU7nvKblhqvnvpHlh6TmnYjlmIvku5LjgaXlsbnokbjlja7jgL3vvL7lrqvnj5Hohpjli4vnrJbliZnlk7rot4blkYHpl57nrabjgLc=","U0JRXEdGUk7nu7Tnu7XnvpHlh6TnnpforqXnqrbotLLvvbrpo73nm5zmtoXnm6TlpJzml6blnYLnkaXvvaTnv43ljr3nmpHlkY7ov7fnmIzjgLc=","U0JRXEdHVU7mkJ3lu4jnvpHljqrmoJHmoKvpp67nvLjnqq/vvankuIjnvpTlhrfmlrLljbfnlKvkuajmlJjlrL7otLLku4LjgLA="],
+            quotes: ["556E6K605bGS5YKn6JG05Yyq772p6La45oym6La45py8772t6Le45ZGg6Lei6aew44G0","55Gn5oGV5oG+6IGr772l5oWp5oGC55St5rSL77y+5Lq56IGk572I5Lmj5Lml5Y6G44G0","57+F5Ye355un5q6n5Lmp5q2X6K+N6K6I6YON6K6b5oik5omx6ZSN772v5oW36LGL5ZGy5Lyo44Cw","5Lms6Kez5oGG55yo5ZGq6JGr5Yy577y+5YW455y555y+5a+i6ZSN5Z2L5Lqo5Lih5qGB55uh5Zyt5aOU6Ye+44C3"]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 简介
+            document.getElementById('bio').textContent = decrypt(encryptedData.bio, KEY);
+
+            // 事迹
+            const eventList = document.getElementById('eventList');
+            encryptedData.events.forEach((enc) => {
+                const full = decrypt(enc, KEY);
+                const parts = full.split('|');
+                const date = parts[0] || '';
+                const desc = parts.slice(1).join('|') || full;
+                const li = document.createElement('li');
+                li.className = 'event-item';
+                const bullet = document.createElement('div');
+                bullet.className = 'event-bullet';
+                const textDiv = document.createElement('div');
+                textDiv.className = 'event-text';
+                textDiv.innerHTML = '<span class="date">' + date + '</span>' + desc;
+                li.appendChild(bullet);
+                li.appendChild(textDiv);
+                eventList.appendChild(li);
+            });
+
+            // 语录
+            const quoteList = document.getElementById('quoteList');
+            encryptedData.quotes.forEach((enc) => {
+                const text = decrypt(enc, KEY);
+                const li = document.createElement('li');
+                li.className = 'quote-item';
+                const icon = document.createElement('span');
+                icon.className = 'q-icon material-icons';
+                icon.textContent = 'format_quote';
+                const blockquote = document.createElement('blockquote');
+                blockquote.textContent = text;
+                li.appendChild(icon);
+                li.appendChild(blockquote);
+                quoteList.appendChild(li);
+            });
+        });
+    </script>
 </body>
 </html>

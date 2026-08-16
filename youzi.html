@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -60,22 +61,19 @@
             padding:32px 36px;
             display:flex;
             gap:32px;
-            align-items:flex-start;
+            align-items:center;
             margin-bottom:28px;
             flex-wrap:wrap;
             border:1px solid #F0F0F0;
         }
         .avatar-large {
-            width:120px; height:120px;
+            width:120px;
+            height:120px;
             border-radius:50%;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:48px;
-            font-weight:700;
-            color:#FFFFFF;
+            object-fit:cover;
+            border:2px solid #CFD8DC;
+            background:#ECEFF1;
             flex-shrink:0;
-            box-shadow:0 4px 16px rgba(0,0,0,0.10);
         }
         .profile-info { flex:1; min-width:200px; }
         .profile-info .name { font-size:28px; font-weight:700; }
@@ -153,18 +151,8 @@
             font-style:italic;
             margin:0;
         }
-        .quote-item blockquote::before {
-            content:'“';
-            color:#FF6D00;
-            font-weight:700;
-            opacity:0.6;
-        }
-        .quote-item blockquote::after {
-            content:'”';
-            color:#FF6D00;
-            font-weight:700;
-            opacity:0.6;
-        }
+        .quote-item blockquote::before { content:"“"; color:#FF6D00; font-weight:700; opacity:0.6; }
+        .quote-item blockquote::after { content:"”"; color:#FF6D00; font-weight:700; opacity:0.6; }
         @media (max-width:768px) {
             .container { padding:20px 16px 40px; }
             .profile-card {
@@ -174,7 +162,7 @@
                 text-align:center;
                 gap:16px;
             }
-            .avatar-large { width:96px; height:96px; font-size:38px; }
+            .avatar-large { width:96px; height:96px; }
             .profile-info .name { font-size:24px; }
             .profile-info .bio { text-align:left; font-size:15px; padding:14px 16px; }
             .section { padding:20px 18px; }
@@ -186,7 +174,7 @@
 <body>
 
     <nav class="navbar">
-        <a href="index.html" class="btn-back">
+        <a href="home.html" class="btn-back">
             <span class="material-icons">arrow_back</span>
             <span>返回</span>
         </a>
@@ -195,34 +183,95 @@
 
     <div class="container">
         <div class="profile-card">
-            <div class="avatar-large" style="background:#E65100;">柚</div>
+            <img src="avatars/youzi.png" alt="柚子" class="avatar-large" onerror="this.style.display='none'">
             <div class="profile-info">
                 <div class="name">柚子</div>
                 <div class="sub">📌 群友档案 · #youzi</div>
-                <div class="bio">群里的开心果，永远充满活力与阳光。无论何时何地，总能带来欢笑和温暖。</div>
+                <div class="bio" id="bio">加载中…</div>
             </div>
         </div>
 
         <div class="section">
             <div class="section-title"><span class="material-icons">history</span> 事迹</div>
-            <ul class="event-list">
-                <li class="event-item"><div class="event-bullet"></div><div class="event-text"><span class="date">2024.01</span>组织第一次群内游戏活动，点燃了大家的热情。</div></li>
-                <li class="event-item"><div class="event-bullet"></div><div class="event-text"><span class="date">2024.03</span>创作群歌《柚子的夏天》，成为群内必唱曲目。</div></li>
-                <li class="event-item"><div class="event-bullet"></div><div class="event-text"><span class="date">2024.06</span>策划并主持群内线上聚会，气氛拉满。</div></li>
-                <li class="event-item"><div class="event-bullet"></div><div class="event-text"><span class="date">2024.09</span>发起「每日一柚」暖心问候计划，坚持至今。</div></li>
-            </ul>
+            <ul class="event-list" id="eventList"></ul>
         </div>
 
         <div class="section">
             <div class="section-title"><span class="material-icons">format_quote</span> 语录</div>
-            <ul class="quote-list">
-                <li class="quote-item"><span class="q-icon material-icons">format_quote</span><blockquote>生活就像柚子，酸甜自知，但回味无穷。</blockquote></li>
-                <li class="quote-item"><span class="q-icon material-icons">format_quote</span><blockquote>开心就笑，不开心就过会儿再笑！</blockquote></li>
-                <li class="quote-item"><span class="q-icon material-icons">format_quote</span><blockquote>群里的每一个人都是我的宝藏～</blockquote></li>
-                <li class="quote-item"><span class="q-icon material-icons">format_quote</span><blockquote>阳光正好，微风不燥，今天也要加油鸭！</blockquote></li>
-            </ul>
+            <ul class="quote-list" id="quoteList"></ul>
         </div>
     </div>
 
+    <script>
+        // 解密密钥由 Worker 注入
+        const KEY = window.DECRYPT_KEY;
+        if (!KEY) {
+            document.body.innerHTML = '<div style="padding:40px;text-align:center;color:red;">错误：无法获取解密密钥，请确认已通过身份验证。</div>';
+            throw new Error('DECRYPT_KEY not available');
+        }
+
+        // 解密函数（与生成器中的 decrypt 相同）
+        function decrypt(encoded, key) {
+            const binary = atob(encoded);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            const decoder = new TextDecoder();
+            const xorResult = decoder.decode(bytes);
+            let result = '';
+            for (let i = 0; i < xorResult.length; i++) {
+                result += String.fromCharCode(xorResult.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+            }
+            return result;
+        }
+
+        // 加密数据（由生成器填充）
+        const encryptedData = {
+            bio: "57+F6Ya+55un5b2o5b6q5p+q772p5rCK6L+s5YW35ruU5rWa5Yup5Lmt6Zmb5YSg44G05paF6K6I5L2l5peE5L2g5Z2R772+5oGY6IKV5bmP5pyT5q2H56yj5ZK85rib5pqj44Gj",
+            events: ["U0JRXEdGVE7nu7Tnu7XnrJnkuaHmrZPnv4flh63muZHmibnmtZ7liprvvLzngovnh7bku6flpZXlr5Xnm6zngoTmgrPjgac=","U0JRXEdGVk7liKvkva7nvpHmrK3jgbjmnrnlrLjnm63lpbnlpYzjgLnvvLzmiKLkuI/nv4Xlh7flvqbllZnmmpvnmpjjgac=","U0JRXEdGU07nrabliKDluYPkuZrmjbPnv4flh63nu5bkubzogL/kvKjvvLzmsKbmsK7miqjmupPjgaE=","U0JRXEdGXE7lj6HotYXjgLnmrq7mlpfkuaPmnrLjgaTmm6Dlvqbpl5zlgKnorpPliKfvva3lnKjmjaLohpvkuqPjgbQ="],
+            quotes: ["55W+5rWJ5bGS5YKn5p6z5aym772p6YWK55Ss6IeY55+Q772t5Ly05Zq95ZCb5paJ56iB44Gn","5b2h5b6x5bGS5625772l5Lm75b2l5b+x5bCB6L+15Lyv5YWe5Ye/562y772p","57+F6Ya+55un5q6n5Lmp5Lmc5Luf6YOP5pif5oij55qx5a+86Ja977y9","6ZmS5YS75qyA5aSV772l5b+Y6aKr5Li/54eV77y+5Lu/5aWI5Lit6Kei5YuI5rOQ6bmb772k"]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 简介
+            document.getElementById('bio').textContent = decrypt(encryptedData.bio, KEY);
+
+            // 事迹
+            const eventList = document.getElementById('eventList');
+            encryptedData.events.forEach((enc) => {
+                const full = decrypt(enc, KEY);
+                const parts = full.split('|');
+                const date = parts[0] || '';
+                const desc = parts.slice(1).join('|') || full;
+                const li = document.createElement('li');
+                li.className = 'event-item';
+                const bullet = document.createElement('div');
+                bullet.className = 'event-bullet';
+                const textDiv = document.createElement('div');
+                textDiv.className = 'event-text';
+                textDiv.innerHTML = '<span class="date">' + date + '</span>' + desc;
+                li.appendChild(bullet);
+                li.appendChild(textDiv);
+                eventList.appendChild(li);
+            });
+
+            // 语录
+            const quoteList = document.getElementById('quoteList');
+            encryptedData.quotes.forEach((enc) => {
+                const text = decrypt(enc, KEY);
+                const li = document.createElement('li');
+                li.className = 'quote-item';
+                const icon = document.createElement('span');
+                icon.className = 'q-icon material-icons';
+                icon.textContent = 'format_quote';
+                const blockquote = document.createElement('blockquote');
+                blockquote.textContent = text;
+                li.appendChild(icon);
+                li.appendChild(blockquote);
+                quoteList.appendChild(li);
+            });
+        });
+    </script>
 </body>
 </html>
